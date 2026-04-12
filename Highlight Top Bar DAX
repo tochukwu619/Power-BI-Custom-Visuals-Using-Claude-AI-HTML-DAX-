@@ -1,0 +1,22 @@
+Claim Cost Color = 
+VAR _BaseTable =
+    ADDCOLUMNS(
+        ALL('Claims Cost'[Cost type]),
+        "@Val", CALCULATE([Total Cost AUD])
+    )
+
+VAR _TopReason =
+    MAXX(
+        TOPN(1, _BaseTable, [@Val], DESC),
+        'Claims Cost'[Cost type]
+    )
+
+VAR _Current =
+    SELECTEDVALUE('Claims Cost'[Cost type])
+
+RETURN
+IF(
+    NOT ISBLANK(_Current) && _Current = _TopReason,
+    "#9071CE",   -- Highlight
+    "#C7B8E7"    -- Default
+)
