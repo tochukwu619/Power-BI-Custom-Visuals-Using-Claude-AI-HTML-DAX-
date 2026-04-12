@@ -1,0 +1,225 @@
+Sub Reason Top 6 = 
+VAR SelectedParam = SELECTEDVALUE('Parameter 2'[Parameter Order], 0)
+VAR _Metric = SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD])
+VAR _Total = SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD])
+
+VAR _AllReasons = 
+    ADDCOLUMNS(
+        VALUES('Water Damage Claims'[CLAIM_CAUSE_SUB_REASON]),
+        "@Val", CALCULATE(SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD]))
+    )
+
+VAR _Ranked = TOPN(6, _AllReasons, [@Val], DESC)
+
+VAR _T1Name = MAXX(TOPN(1, _Ranked, [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T1V    = MAXX(TOPN(1, _Ranked, [@Val], DESC), [@Val])
+
+VAR _T2Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T2V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name), [@Val])
+
+VAR _T3Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T3V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name), [@Val])
+
+VAR _T4Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T4V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name), [@Val])
+
+VAR _T5Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T5V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name), [@Val])
+
+VAR _T6Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T5Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T6V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T5Name), [@Val])
+
+VAR _T1P = FORMAT(ROUND(DIVIDE(_T1V, _Total) * 100, 1), "0.0") & "%"
+VAR _T2P = FORMAT(ROUND(DIVIDE(_T2V, _Total) * 100, 1), "0.0") & "%"
+VAR _T3P = FORMAT(ROUND(DIVIDE(_T3V, _Total) * 100, 1), "0.0") & "%"
+VAR _T4P = FORMAT(ROUND(DIVIDE(_T4V, _Total) * 100, 1), "0.0") & "%"
+VAR _T5P = FORMAT(ROUND(DIVIDE(_T5V, _Total) * 100, 1), "0.0") & "%"
+VAR _T6P = FORMAT(ROUND(DIVIDE(_T6V, _Total) * 100, 1), "0.0") & "%"
+
+VAR _Top6Total = _T1V + _T2V + _T3V + _T4V + _T5V + _T6V
+VAR _Top6Pct = FORMAT(ROUND(DIVIDE(_Top6Total, _Total) * 100, 1), "0.0") & "%"
+VAR _RestV = _Total - _Top6Total
+VAR _RestP = FORMAT(ROUND(DIVIDE(_RestV, _Total) * 100, 1), "0.0") & "%"
+VAR _RestCount = COUNTROWS(FILTER(_AllReasons, [@Val] > 0)) - 6
+
+VAR _MetricLabel = IF(SelectedParam = 0, "claims", "AUD")
+VAR _T1Fmt = IF(SelectedParam = 0, FORMAT(_T1V,"#,0"), FORMAT(_T1V/1000000,"#,0.0") & "M")
+VAR _T2Fmt = IF(SelectedParam = 0, FORMAT(_T2V,"#,0"), FORMAT(_T2V/1000000,"#,0.0") & "M")
+VAR _T3Fmt = IF(SelectedParam = 0, FORMAT(_T3V,"#,0"), FORMAT(_T3V/1000000,"#,0.0") & "M")
+VAR _T4Fmt = IF(SelectedParam = 0, FORMAT(_T4V,"#,0"), FORMAT(_T4V/1000000,"#,0.0") & "M")
+VAR _T5Fmt = IF(SelectedParam = 0, FORMAT(_T5V,"#,0"), FORMAT(_T5V/1000000,"#,0.0") & "M")
+VAR _T6Fmt = IF(SelectedParam = 0, FORMAT(_T6V,"#,0"), FORMAT(_T6V/1000000,"#,0.0") & "M")
+VAR _RestFmt = IF(SelectedParam = 0, FORMAT(_RestV,"#,0"), FORMAT(_RestV/1000000,"#,0.0") & "M")
+
+RETURN
+"<style>
+  .sr{font-family:Inter,sans-serif;padding:8px 12px;background:transparent;width:460px;height:280px;box-sizing:border-box}
+  .sr-t{font-size:14px;font-weight:700;color:rgb(45,27,78);margin-bottom:8px}
+  .sr-t span{color:rgb(192,132,252)}
+  .sr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+  .sr-card{background:rgb(243,239,249);border-radius:5px;padding:7px 9px}
+  .sr-name{font-size:12px;color:rgb(28,28,28);margin-bottom:2px;line-height:1.3}
+  .sr-pct{font-size:16px;font-weight:700;color:rgb(45,27,78);line-height:1}
+  .sr-val{font-size:14px;color:rgb(28,28,28);margin-top:1px}
+  .sr-rest{background:rgb(250,245,255);border:1px solid rgb(221,214,243);border-radius:5px;padding:7px 10px;font-size:10px;color:rgb(109,76,158);line-height:1.5}
+  .sr-rest strong{color:rgb(45,27,78);font-size:11px}
+</style>
+<div class='sr'>
+  <div class='sr-t'>Top 6 account for <span>" & _Top6Pct & "</span> of overall " & _MetricLabel & "</div>
+  <div class='sr-grid'>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T1Name & "</div>
+      <div class='sr-pct'>" & _T1P & "</div>
+      <div class='sr-val'>" & _T1Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T2Name & "</div>
+      <div class='sr-pct'>" & _T2P & "</div>
+      <div class='sr-val'>" & _T2Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T3Name & "</div>
+      <div class='sr-pct'>" & _T3P & "</div>
+      <div class='sr-val'>" & _T3Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T4Name & "</div>
+      <div class='sr-pct'>" & _T4P & "</div>
+      <div class='sr-val'>" & _T4Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T5Name & "</div>
+      <div class='sr-pct'>" & _T5P & "</div>
+      <div class='sr-val'>" & _T5Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T6Name & "</div>
+      <div class='sr-pct'>" & _T6P & "</div>
+      <div class='sr-val'>" & _T6Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+  </div>
+
+  <div class='sr-rest'>
+    <strong>Remaining " & _RestP & " (" & _RestFmt & " " & _MetricLabel & ")</strong> spread across " &
+    FORMAT(_RestCount,"#,0") & " other sub-causes representing secondary risk drivers.
+  </div>
+</div>" = 
+VAR SelectedParam = SELECTEDVALUE('Parameter 2'[Parameter Order], 0)
+VAR _Metric = SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD])
+VAR _Total = SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD])
+
+VAR _AllReasons = 
+    ADDCOLUMNS(
+        VALUES('Water Damage Claims'[CLAIM_CAUSE_SUB_REASON]),
+        "@Val", CALCULATE(SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD]))
+    )
+
+VAR _Ranked = TOPN(6, _AllReasons, [@Val], DESC)
+
+VAR _T1Name = MAXX(TOPN(1, _Ranked, [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T1V    = MAXX(TOPN(1, _Ranked, [@Val], DESC), [@Val])
+
+VAR _T2Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T2V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name), [@Val])
+
+VAR _T3Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T3V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name), [@Val])
+
+VAR _T4Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T4V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name), [@Val])
+
+VAR _T5Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T5V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name), [@Val])
+
+VAR _T6Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T5Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T6V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T5Name), [@Val])
+
+VAR _T1P = FORMAT(ROUND(DIVIDE(_T1V, _Total) * 100, 1), "0.0") & "%"
+VAR _T2P = FORMAT(ROUND(DIVIDE(_T2V, _Total) * 100, 1), "0.0") & "%"
+VAR _T3P = FORMAT(ROUND(DIVIDE(_T3V, _Total) * 100, 1), "0.0") & "%"
+VAR _T4P = FORMAT(ROUND(DIVIDE(_T4V, _Total) * 100, 1), "0.0") & "%"
+VAR _T5P = FORMAT(ROUND(DIVIDE(_T5V, _Total) * 100, 1), "0.0") & "%"
+VAR _T6P = FORMAT(ROUND(DIVIDE(_T6V, _Total) * 100, 1), "0.0") & "%"
+
+VAR _Top6Total = _T1V + _T2V + _T3V + _T4V + _T5V + _T6V
+VAR _Top6Pct = FORMAT(ROUND(DIVIDE(_Top6Total, _Total) * 100, 1), "0.0") & "%"
+VAR _RestV = _Total - _Top6Total
+VAR _RestP = FORMAT(ROUND(DIVIDE(_RestV, _Total) * 100, 1), "0.0") & "%"
+VAR _RestCount = COUNTROWS(FILTER(_AllReasons, [@Val] > 0)) - 6
+
+VAR _MetricLabel = IF(SelectedParam = 0, "claims", "AUD")
+VAR _T1Fmt = IF(SelectedParam = 0, FORMAT(_T1V,"#,0"), FORMAT(_T1V/1000000,"#,0.0") & "M")
+VAR _T2Fmt = IF(SelectedParam = 0, FORMAT(_T2V,"#,0"), FORMAT(_T2V/1000000,"#,0.0") & "M")
+VAR _T3Fmt = IF(SelectedParam = 0, FORMAT(_T3V,"#,0"), FORMAT(_T3V/1000000,"#,0.0") & "M")
+VAR _T4Fmt = IF(SelectedParam = 0, FORMAT(_T4V,"#,0"), FORMAT(_T4V/1000000,"#,0.0") & "M")
+VAR _T5Fmt = IF(SelectedParam = 0, FORMAT(_T5V,"#,0"), FORMAT(_T5V/1000000,"#,0.0") & "M")
+VAR _T6Fmt = IF(SelectedParam = 0, FORMAT(_T6V,"#,0"), FORMAT(_T6V/1000000,"#,0.0") & "M")
+VAR _RestFmt = IF(SelectedParam = 0, FORMAT(_RestV,"#,0"), FORMAT(_RestV/1000000,"#,0.0") & "M")
+
+RETURN
+"<style>
+  .sr{font-family:Inter,sans-serif;padding:8px 12px;background:transparent;width:460px;height:280px;box-sizing:border-box}
+  .sr-t{font-size:14px;font-weight:700;color:rgb(45,27,78);margin-bottom:8px}
+  .sr-t span{color:rgb(192,132,252)}
+  .sr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+  .sr-card{background:rgb(243,239,249);border-radius:5px;padding:7px 9px}
+  .sr-name{font-size:12px;color:rgb(28,28,28);margin-bottom:2px;line-height:1.3}
+  .sr-pct{font-size:16px;font-weight:700;color:rgb(45,27,78);line-height:1}
+  .sr-val{font-size:14px;color:rgb(28,28,28);margin-top:1px}
+  .sr-rest{background:rgb(250,245,255);border:1px solid rgb(221,214,243);border-radius:5px;padding:7px 10px;font-size:10px;color:rgb(109,76,158);line-height:1.5}
+  .sr-rest strong{color:rgb(45,27,78);font-size:11px}
+</style>
+<div class='sr'>
+  <div class='sr-t'>Top 6 account for <span>" & _Top6Pct & "</span> of overall " & _MetricLabel & "</div>
+  <div class='sr-grid'>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T1Name & "</div>
+      <div class='sr-pct'>" & _T1P & "</div>
+      <div class='sr-val'>" & _T1Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T2Name & "</div>
+      <div class='sr-pct'>" & _T2P & "</div>
+      <div class='sr-val'>" & _T2Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T3Name & "</div>
+      <div class='sr-pct'>" & _T3P & "</div>
+      <div class='sr-val'>" & _T3Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T4Name & "</div>
+      <div class='sr-pct'>" & _T4P & "</div>
+      <div class='sr-val'>" & _T4Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T5Name & "</div>
+      <div class='sr-pct'>" & _T5P & "</div>
+      <div class='sr-val'>" & _T5Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+    <div class='sr-card'>
+      <div class='sr-name'>" & _T6Name & "</div>
+      <div class='sr-pct'>" & _T6P & "</div>
+      <div class='sr-val'>" & _T6Fmt & " " & _MetricLabel & "</div>
+    </div>
+
+  </div>
+
+  <div class='sr-rest'>
+    <strong>Remaining " & _RestP & " (" & _RestFmt & " " & _MetricLabel & ")</strong> spread across " &
+    FORMAT(_RestCount,"#,0") & " other sub-causes representing secondary risk drivers.
+  </div>
+</div>"
