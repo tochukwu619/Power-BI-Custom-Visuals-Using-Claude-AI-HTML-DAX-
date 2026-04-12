@@ -1,0 +1,98 @@
+Claim Type Visual = 
+VAR SelectedParam = SELECTEDVALUE('Parameter 2'[Parameter Order], 0)
+
+VAR _Structure = CALCULATE(
+    SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD]),
+    'Water Damage Claims'[CLAIM_TYPE] = "Structure")
+VAR _StructCont = CALCULATE(
+    SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD]),
+    'Water Damage Claims'[CLAIM_TYPE] = "Structure & Contents")
+VAR _Contents = CALCULATE(
+    SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD]),
+    'Water Damage Claims'[CLAIM_TYPE] = "Contents")
+VAR _Total = _Structure + _StructCont + _Contents
+
+VAR _SP  = ROUND(DIVIDE(_Structure,  _Total) * 100, 1)
+VAR _SCP = ROUND(DIVIDE(_StructCont, _Total) * 100, 1)
+VAR _CP  = ROUND(DIVIDE(_Contents,   _Total) * 100, 1)
+
+VAR _SFmt  = IF(SelectedParam = 0, FORMAT(_Structure,  "#,0"), FORMAT(_Structure/1000000,  "#,0.0") & "M")
+VAR _SCFmt = IF(SelectedParam = 0, FORMAT(_StructCont, "#,0"), FORMAT(_StructCont/1000000, "#,0.0") & "M")
+VAR _CFmt  = IF(SelectedParam = 0, FORMAT(_Contents,   "#,0"), FORMAT(_Contents/1000000,   "#,0.0") & "M")
+
+VAR _Circ = 502.65
+VAR _SDash  = FORMAT(ROUND(_SP  / 100 * _Circ, 1), "0.0")
+VAR _SCDash = FORMAT(ROUND(_SCP / 100 * _Circ, 1), "0.0")
+VAR _CDash  = FORMAT(ROUND(_CP  / 100 * _Circ, 1), "0.0")
+VAR _SOffset  = "0"
+VAR _SCOffset = FORMAT(ROUND(_SP / 100 * _Circ, 1), "0.0")
+VAR _COffset  = FORMAT(ROUND((_SP + _SCP) / 100 * _Circ, 1), "0.0")
+
+VAR _MetricLabel = IF(SelectedParam = 0, "claims", "AUD")
+
+RETURN
+"<style>
+  .ct{font-family:Inter,sans-serif;padding:10px 14px;background:transparent;width:470px;height:285px;box-sizing:border-box}
+  .ct-t{font-size:12px;font-weight:700;color:rgb(45,27,78);margin-bottom:10px}
+  .ct-wrap{display:flex;align-items:center;gap:14px;height:230px}
+  .ct-legend{flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px}
+  .ct-item{display:flex;align-items:center;gap:8px;padding:9px 11px;background:rgb(243,239,249);border-radius:6px}
+  .ct-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+  .ct-info{flex:1}
+  .ct-name{font-size:11px;font-weight:600;color:rgb(45,27,78);margin-bottom:1px}
+  .ct-sub{font-size:16px;color:rgb(158,142,192)}
+  .ct-pct{font-size:16px;font-weight:700;color:rgb(45,27,78)}
+</style>
+<div class='ct'>
+  <div class='ct-t'></div>
+  <div class='ct-wrap'>
+
+    <svg width='155' height='155' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' style='flex-shrink:0'>
+      <circle cx='100' cy='100' r='80' fill='none' stroke='rgb(221,214,243)' stroke-width='32'/>
+      <circle cx='100' cy='100' r='80' fill='none' stroke='rgb(45,27,78)' stroke-width='32'
+        stroke-dasharray='" & _SDash & " " & _Circ & "'
+        stroke-dashoffset='" & _SOffset & "'
+        transform='rotate(-90 100 100)'/>
+      <circle cx='100' cy='100' r='80' fill='none' stroke='rgb(192,132,252)' stroke-width='32'
+        stroke-dasharray='" & _SCDash & " " & _Circ & "'
+        stroke-dashoffset='-" & _SCOffset & "'
+        transform='rotate(-90 100 100)'/>
+      <circle cx='100' cy='100' r='80' fill='none' stroke='rgb(52,211,153)' stroke-width='32'
+        stroke-dasharray='" & _CDash & " " & _Circ & "'
+        stroke-dashoffset='-" & _COffset & "'
+        transform='rotate(-90 100 100)'/>
+      <circle cx='100' cy='100' r='52' fill='transparent'/>
+    </svg>
+
+    <div class='ct-legend'>
+
+      <div class='ct-item'>
+        <div class='ct-dot' style='background:rgb(45,27,78)'></div>
+        <div class='ct-info'>
+          <div class='ct-name'>Structure</div>
+          <div class='ct-sub'>" & _SFmt & " " & _MetricLabel & "</div>
+        </div>
+        <div class='ct-pct'>" & FORMAT(_SP,"0.0") & "%</div>
+      </div>
+
+      <div class='ct-item'>
+        <div class='ct-dot' style='background:rgb(192,132,252)'></div>
+        <div class='ct-info'>
+          <div class='ct-name'>Structure & Contents</div>
+          <div class='ct-sub'>" & _SCFmt & " " & _MetricLabel & "</div>
+        </div>
+        <div class='ct-pct'>" & FORMAT(_SCP,"0.0") & "%</div>
+      </div>
+
+      <div class='ct-item'>
+        <div class='ct-dot' style='background:rgb(52,211,153)'></div>
+        <div class='ct-info'>
+          <div class='ct-name'>Contents</div>
+          <div class='ct-sub'>" & _CFmt & " " & _MetricLabel & "</div>
+        </div>
+        <div class='ct-pct'>" & FORMAT(_CP,"0.0") & "%</div>
+      </div>
+
+    </div>
+  </div>
+</div>"
