@@ -1,0 +1,173 @@
+Sub Reason Top 6 2 = 
+VAR SelectedParam = SELECTEDVALUE('KPI'[KPI Order], 0)
+VAR _Total = SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD])
+
+VAR _AllReasons = 
+    ADDCOLUMNS(
+        VALUES('Water Damage Claims'[CLAIM_CAUSE_SUB_REASON]),
+        "@Val", CALCULATE(SWITCH(SelectedParam, 0, [Total Claims], [Total Cost AUD]))
+    )
+
+VAR _Ranked = TOPN(6, _AllReasons, [@Val], DESC)
+
+VAR _T1Name = MAXX(TOPN(1, _Ranked, [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T1V    = MAXX(TOPN(1, _Ranked, [@Val], DESC), [@Val])
+
+VAR _T2Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T2V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name), [@Val])
+
+VAR _T3Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T3V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name), [@Val])
+
+VAR _T4Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T4V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name), [@Val])
+
+VAR _T5Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T5V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name), [@Val])
+
+VAR _T6Name = MAXX(TOPN(1, FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T5Name), [@Val], DESC), 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON])
+VAR _T6V    = MAXX(FILTER(_Ranked, 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T1Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T2Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T3Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T4Name && 'Water Damage Claims'[CLAIM_CAUSE_SUB_REASON] <> _T5Name), [@Val])
+
+VAR _Max = _T1V
+
+VAR _H1 = ROUND(DIVIDE(_T1V, _Max) * 140, 0)
+VAR _H2 = ROUND(DIVIDE(_T2V, _Max) * 140, 0)
+VAR _H3 = ROUND(DIVIDE(_T3V, _Max) * 140, 0)
+VAR _H4 = ROUND(DIVIDE(_T4V, _Max) * 140, 0)
+VAR _H5 = ROUND(DIVIDE(_T5V, _Max) * 140, 0)
+VAR _H6 = ROUND(DIVIDE(_T6V, _Max) * 140, 0)
+
+VAR _Y1 = 180 - _H1
+VAR _Y2 = 180 - _H2
+VAR _Y3 = 180 - _H3
+VAR _Y4 = 180 - _H4
+VAR _Y5 = 180 - _H5
+VAR _Y6 = 180 - _H6
+
+VAR _C1 = DIVIDE(_T1V, _Total) * 100
+VAR _C2 = _C1 + DIVIDE(_T2V, _Total) * 100
+VAR _C3 = _C2 + DIVIDE(_T3V, _Total) * 100
+VAR _C4 = _C3 + DIVIDE(_T4V, _Total) * 100
+VAR _C5 = _C4 + DIVIDE(_T5V, _Total) * 100
+VAR _C6 = _C5 + DIVIDE(_T6V, _Total) * 100
+
+VAR _CY1 = 180 - ROUND(_C1 / 100 * 140, 0)
+VAR _CY2 = 180 - ROUND(_C2 / 100 * 140, 0)
+VAR _CY3 = 180 - ROUND(_C3 / 100 * 140, 0)
+VAR _CY4 = 180 - ROUND(_C4 / 100 * 140, 0)
+VAR _CY5 = 180 - ROUND(_C5 / 100 * 140, 0)
+VAR _CY6 = 180 - ROUND(_C6 / 100 * 140, 0)
+
+VAR _Y80 = 180 - ROUND(80 / 100 * 140, 0)
+
+VAR _CrossIdx = 
+    SWITCH(TRUE(),
+        _C1 >= 80, 1,
+        _C2 >= 80, 2,
+        _C3 >= 80, 3,
+        _C4 >= 80, 4,
+        _C5 >= 80, 5,
+        _C6 >= 80, 6,
+        0)
+VAR _CrossLabel = 
+    IF(_CrossIdx > 0,
+        "First " & _CrossIdx & " sub-causes cross the 80% concentration line",
+        "Top 6 do not reach 80% — risk is diffuse across many causes")
+
+VAR _MetricLabel = IF(SelectedParam = 0, "claims", "AUD")
+VAR _T1Fmt = IF(SelectedParam = 0, FORMAT(_T1V,"#,0"), FORMAT(_T1V/1000000,"#,0.1") & "M")
+VAR _T2Fmt = IF(SelectedParam = 0, FORMAT(_T2V,"#,0"), FORMAT(_T2V/1000000,"#,0.1") & "M")
+VAR _T3Fmt = IF(SelectedParam = 0, FORMAT(_T3V,"#,0"), FORMAT(_T3V/1000000,"#,0.1") & "M")
+VAR _T4Fmt = IF(SelectedParam = 0, FORMAT(_T4V,"#,0"), FORMAT(_T4V/1000000,"#,0.1") & "M")
+VAR _T5Fmt = IF(SelectedParam = 0, FORMAT(_T5V,"#,0"), FORMAT(_T5V/1000000,"#,0.1") & "M")
+VAR _T6Fmt = IF(SelectedParam = 0, FORMAT(_T6V,"#,0"), FORMAT(_T6V/1000000,"#,0.1") & "M")
+
+VAR _Top6Pct = FORMAT(ROUND(_C6, 1), "0.0") & "%"
+
+VAR _Trunc1 = IF(LEN(_T1Name) > 14, LEFT(_T1Name, 12) & "…", _T1Name)
+VAR _Trunc2 = IF(LEN(_T2Name) > 14, LEFT(_T2Name, 12) & "…", _T2Name)
+VAR _Trunc3 = IF(LEN(_T3Name) > 14, LEFT(_T3Name, 12) & "…", _T3Name)
+VAR _Trunc4 = IF(LEN(_T4Name) > 14, LEFT(_T4Name, 12) & "…", _T4Name)
+VAR _Trunc5 = IF(LEN(_T5Name) > 14, LEFT(_T5Name, 12) & "…", _T5Name)
+VAR _Trunc6 = IF(LEN(_T6Name) > 14, LEFT(_T6Name, 12) & "…", _T6Name)
+
+RETURN
+"<style>
+  .pr{font-family:Inter,sans-serif;padding:8px 12px;background:transparent;width:460px;height:280px;box-sizing:border-box}
+  .pr-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+  .pr-t{font-size:13px;font-weight:700;color:rgb(45,85,92)}
+  .pr-t span{color:rgb(125,165,168)}
+  .pr-legend{display:flex;gap:10px;font-size:9px;color:rgb(120,145,148)}
+  .pr-legend div{display:flex;align-items:center;gap:4px}
+  .pr-sw{width:10px;height:3px;border-radius:1px}
+  .pr-foot{font-size:10px;color:rgb(67,110,116);margin-top:4px;font-style:italic;text-align:center}
+</style>
+<div class='pr'>
+  <div class='pr-hd'>
+    <div class='pr-t'>Top 6 sub-causes · <span>" & _Top6Pct & "</span> of total " & _MetricLabel & "</div>
+    <div class='pr-legend'>
+      <div><span class='pr-sw' style='background:rgb(45,85,92)'></span>Share</div>
+      <div><span class='pr-sw' style='background:rgb(125,165,168)'></span>Cumulative %</div>
+    </div>
+  </div>
+
+  <svg width='100%' height='220' viewBox='0 0 460 220' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid meet'>
+
+    <line x1='40' y1='40' x2='440' y2='40' stroke='rgb(215,226,225)' stroke-width='1' stroke-dasharray='2,2'/>
+    <line x1='40' y1='80' x2='440' y2='80' stroke='rgb(215,226,225)' stroke-width='1' stroke-dasharray='2,2'/>
+    <line x1='40' y1='120' x2='440' y2='120' stroke='rgb(215,226,225)' stroke-width='1' stroke-dasharray='2,2'/>
+    <line x1='40' y1='160' x2='440' y2='160' stroke='rgb(215,226,225)' stroke-width='1' stroke-dasharray='2,2'/>
+    <line x1='40' y1='180' x2='440' y2='180' stroke='rgb(182,200,202)' stroke-width='1'/>
+
+    <line x1='40' y1='" & _Y80 & "' x2='440' y2='" & _Y80 & "' stroke='rgb(125,165,168)' stroke-width='1.5' stroke-dasharray='4,3' opacity='0.7'/>
+    <text x='445' y='" & (_Y80 + 3) & "' font-size='9' font-weight='700' fill='rgb(125,165,168)'>80%</text>
+
+    <text x='35' y='44' text-anchor='end' font-size='8' fill='rgb(120,145,148)'>100%</text>
+    <text x='35' y='84' text-anchor='end' font-size='8' fill='rgb(120,145,148)'>75%</text>
+    <text x='35' y='124' text-anchor='end' font-size='8' fill='rgb(120,145,148)'>50%</text>
+    <text x='35' y='164' text-anchor='end' font-size='8' fill='rgb(120,145,148)'>25%</text>
+
+    <rect x='52'  y='" & _Y1 & "' width='48' height='" & _H1 & "' rx='3' fill='rgb(45,85,92)'/>
+    <rect x='118' y='" & _Y2 & "' width='48' height='" & _H2 & "' rx='3' fill='rgb(67,110,116)'/>
+    <rect x='184' y='" & _Y3 & "' width='48' height='" & _H3 & "' rx='3' fill='rgb(95,140,145)'/>
+    <rect x='250' y='" & _Y4 & "' width='48' height='" & _H4 & "' rx='3' fill='rgb(140,175,178)'/>
+    <rect x='316' y='" & _Y5 & "' width='48' height='" & _H5 & "' rx='3' fill='rgb(175,200,202)'/>
+    <rect x='382' y='" & _Y6 & "' width='48' height='" & _H6 & "' rx='3' fill='rgb(200,216,216)'/>
+
+    <text x='76'  y='" & (_Y1 - 4) & "' text-anchor='middle' font-size='10' font-weight='700' fill='rgb(45,85,92)'>" & _T1Fmt & "</text>
+    <text x='142' y='" & (_Y2 - 4) & "' text-anchor='middle' font-size='10' font-weight='700' fill='rgb(45,85,92)'>" & _T2Fmt & "</text>
+    <text x='208' y='" & (_Y3 - 4) & "' text-anchor='middle' font-size='10' font-weight='700' fill='rgb(45,85,92)'>" & _T3Fmt & "</text>
+    <text x='274' y='" & (_Y4 - 4) & "' text-anchor='middle' font-size='10' font-weight='700' fill='rgb(45,85,92)'>" & _T4Fmt & "</text>
+    <text x='340' y='" & (_Y5 - 4) & "' text-anchor='middle' font-size='10' font-weight='700' fill='rgb(45,85,92)'>" & _T5Fmt & "</text>
+    <text x='406' y='" & (_Y6 - 4) & "' text-anchor='middle' font-size='10' font-weight='700' fill='rgb(45,85,92)'>" & _T6Fmt & "</text>
+
+    <polyline points='76," & _CY1 & " 142," & _CY2 & " 208," & _CY3 & " 274," & _CY4 & " 340," & _CY5 & " 406," & _CY6 & "'
+      fill='none' stroke='rgb(125,165,168)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/>
+
+    <circle cx='76'  cy='" & _CY1 & "' r='4' fill='white' stroke='rgb(125,165,168)' stroke-width='2'/>
+    <circle cx='142' cy='" & _CY2 & "' r='4' fill='white' stroke='rgb(125,165,168)' stroke-width='2'/>
+    <circle cx='208' cy='" & _CY3 & "' r='4' fill='white' stroke='rgb(125,165,168)' stroke-width='2'/>
+    <circle cx='274' cy='" & _CY4 & "' r='4' fill='white' stroke='rgb(125,165,168)' stroke-width='2'/>
+    <circle cx='340' cy='" & _CY5 & "' r='4' fill='white' stroke='rgb(125,165,168)' stroke-width='2'/>
+    <circle cx='406' cy='" & _CY6 & "' r='4' fill='rgb(45,85,92)' stroke='rgb(45,85,92)' stroke-width='2'/>
+
+    <text x='406' y='" & (_CY6 - 10) & "' text-anchor='middle' font-size='9' font-weight='700' fill='rgb(45,85,92)'>" & _Top6Pct & "</text>
+
+    <text x='76'  y='196' text-anchor='middle' font-size='9' font-weight='600' fill='rgb(45,85,92)'>" & _Trunc1 & "</text>
+    <text x='142' y='196' text-anchor='middle' font-size='9' font-weight='600' fill='rgb(45,85,92)'>" & _Trunc2 & "</text>
+    <text x='208' y='196' text-anchor='middle' font-size='9' font-weight='600' fill='rgb(45,85,92)'>" & _Trunc3 & "</text>
+    <text x='274' y='196' text-anchor='middle' font-size='9' font-weight='600' fill='rgb(45,85,92)'>" & _Trunc4 & "</text>
+    <text x='340' y='196' text-anchor='middle' font-size='9' font-weight='600' fill='rgb(45,85,92)'>" & _Trunc5 & "</text>
+    <text x='406' y='196' text-anchor='middle' font-size='9' font-weight='600' fill='rgb(45,85,92)'>" & _Trunc6 & "</text>
+
+    <text x='76'  y='210' text-anchor='middle' font-size='9' fill='rgb(120,145,148)'>#1</text>
+    <text x='142' y='210' text-anchor='middle' font-size='9' fill='rgb(120,145,148)'>#2</text>
+    <text x='208' y='210' text-anchor='middle' font-size='9' fill='rgb(120,145,148)'>#3</text>
+    <text x='274' y='210' text-anchor='middle' font-size='9' fill='rgb(120,145,148)'>#4</text>
+    <text x='340' y='210' text-anchor='middle' font-size='9' fill='rgb(120,145,148)'>#5</text>
+    <text x='406' y='210' text-anchor='middle' font-size='9' fill='rgb(120,145,148)'>#6</text>
+
+  </svg>
+
+  <div class='pr-foot'>" & _CrossLabel & "</div>
+</div>"
