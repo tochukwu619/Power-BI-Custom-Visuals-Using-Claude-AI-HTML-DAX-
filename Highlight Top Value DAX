@@ -1,0 +1,31 @@
+Claim Cause Color = 
+VAR SelectedParam = SELECTEDVALUE('Parameter 2'[Parameter Order], 0)
+
+VAR _BaseTable =
+    ADDCOLUMNS(
+        ALL('Water Damage Claims'[CLAIM_CAUSE_REASON]),
+        "@Val",
+            CALCULATE(
+                SWITCH(
+                    SelectedParam,
+                    0, [Total Claims],
+                    [Total Cost AUD]
+                )
+            )
+    )
+
+VAR _TopReason =
+    MAXX(
+        TOPN(1, _BaseTable, [@Val], DESC),
+        'Water Damage Claims'[CLAIM_CAUSE_REASON]
+    )
+
+VAR _Current =
+    SELECTEDVALUE('Water Damage Claims'[CLAIM_CAUSE_REASON])
+
+RETURN
+IF(
+    NOT ISBLANK(_Current) && _Current = _TopReason,
+    "#9071CE",   -- Highlight
+    "#C7B8E7"    -- Default
+)
