@@ -1,0 +1,7 @@
+Claim Cause Title = 
+SWITCH(
+        SELECTEDVALUE('Parameter 2'[Parameter Order]),  
+        0, "Major Cause / Reasons for Claims",
+        1,"Cost Distribution Across Major Cause / Reasons",
+        ""
+    )
